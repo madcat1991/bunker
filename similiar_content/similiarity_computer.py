@@ -340,7 +340,7 @@ class Catalogue(object):
         t0 = time.time()
         for c1 in self.id_to_info:
             similiar = self.find_similar_for_catalogue_item(c1)
-            for metric, c2 in similiar:
+            for metric, c2, explain in similiar:
                 out.write('%s;%s;%s\n' % (c1, c2, metric))
             n += 1
             if n % 100 == 0:
@@ -358,9 +358,9 @@ def main():
     with timing('one_similiar'):
         sims = cat.find_similar_for_catalogue_item(_id, limit=15)
 
-    cat.format_similar_results(_id, sims)
+    cat.print_similar_results(_id, sims)
 
-    cat.find_em_all()
+    #cat.find_em_all()
 
 if __name__ == '__main__':
     #import pyximport
