@@ -42,10 +42,15 @@ class GenresAndCategoriesToAttributes(DBToRedisBaseProcess):
         """
         cursor.execute(sql)
 
+        categories = set()
         for content_id, genre, category in cursor:
             self.redis.hincrby(attr_key(genre), content_id, 1)
-            self.redis.hincrby(attr_key(category), content_id, 1)
-            self.redis.incr(content_key(content_id), 2)  # 2 атрибута было добавлено
+            self.redis.incr(content_key(content_id), 1) 
+
+            if category not in categories:
+                self.redis.hincrby(attr_key(category), content_id, 1)
+                self.redis.incr(content_key(content_id), 1)
+                categories.add(category)
         self.conn.close()
 
 
