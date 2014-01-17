@@ -29,7 +29,7 @@ class Content(object):
                 try:
                     tf = float(rd.hget(attr_key(attr), self.id)) / terms_in_doc
                     idf = float(rd.hlen(attr_key(attr))) / docs_count
-                except ValueError:
+                except (TypeError, ValueError):
                     pass
                 else:
                     self.terms[attr] = tf / idf
@@ -128,7 +128,7 @@ def find_similar_for_content(content_id, cursor, rd, top=20):
 
             sim = get_similarity(main_content, other_content)
             if sim > 0:
-                result[title] = sim
+                result["%s %s" % (c_id, title)] = sim
 
         result = sorted(result.iteritems(), key=lambda x: x[1], reverse=True)[:top]
         for k, v in result:
