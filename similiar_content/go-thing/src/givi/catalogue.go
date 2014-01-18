@@ -85,9 +85,9 @@ func (self *Catalogue) FindSimiliarForInfo(c1_info *Info, ids_to_exclude *IntSet
 	ids_to_scan := ids_to_scan_set.AsArray()
 
 	w_country := 1.0
-	w_category := 1.0
+	w_category := 0.5
 	w_genre := 3.0
-	w_property := 0.5
+	w_property := 0.7
 	w_people := 0.3
 	w_date := 1.0
 
