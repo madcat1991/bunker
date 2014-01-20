@@ -87,7 +87,7 @@ def collect_data():
 def get_similarity(content1, content2):
     up = len(content1.attrs.intersection(content2.attrs))
     if up > 0:
-        down = len(content1.attrs)
+        down = len(content1.attrs.union(content2.attrs))
         return float(up) / down
     return 0
 
