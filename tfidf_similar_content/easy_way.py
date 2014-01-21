@@ -3,8 +3,13 @@
 """
 Упрощенный вариант
 """
+import argparse
+import logging
 import psycopg2
+import sys
 from finder import prepare_attrs
+
+logger = logging.getLogger("easy_way")
 
 sql = """
     WITH gcc AS (
@@ -69,9 +74,14 @@ class Content(object):
         return "%s. %s" % (self.id, self.title)
 
 
-def collect_data():
+def collect_data(args):
     data = {}
-    conn = psycopg2.connect(database="da_prod", user="da", host="localhost", port="5432")
+    conn = psycopg2.connect(
+        database=args.db_name,
+        user=args.db_user,
+        host=args.db_host,
+        port=args.db_port
+    )
     cursor = conn.cursor()
     cursor.execute(sql)
     for c_id, c_title, genres, categories, persons, awards, properties, tags in cursor:
@@ -103,6 +113,24 @@ def find_similar_content(data, similar_to=64252, top=20):
         print k, "-", v
 
 if __name__ == "__main__":
-    data = collect_data()
-    print "DATA COLLECTED"
-    find_similar_content(data, similar_to=64238)
+    parser = argparse.ArgumentParser(description=u'Скрипт для поиска похожего контента')
+    parser.add_argument('--db_host', default="localhost", type=str, dest="db_host",
+                        help=u'Хост БД, по умолчанию: localhost')
+    parser.add_argument('--db_port', default="5432", type=str, dest="db_port",
+                        help=u'Порт БД, по умолчанию: 5432')
+    parser.add_argument('--db_name', default="da_prod", type=str, dest="db_name",
+                        help=u'Имя БД, по умолчанию: da')
+    parser.add_argument('--db_user', default="da", type=str, dest="db_user",
+                        help=u'Пользователь БД, по умолчанию: da')
+    parser.add_argument('-c', default=64252, type=int, dest="similar_to",
+                        help=u'Идентификатор контента для которого будут искаться похожие. '
+                             u'По умолчанию: 64252 (Темный рыцарь)')
+    parser.add_argument('-t', default=20, type=int, dest="top",
+                        help=u'Размер топа результатов. '
+                             u'По умолчанию находятся первые 20 похожих единиц контента')
+
+    args = parser.parse_args()
+    logging.basicConfig(stream=sys.stdout, level="INFO", format="%(asctime)s :: %(message)s")
+    data = collect_data(args)
+    logger.info("DATA COLLECTED")
+    find_similar_content(data, similar_to=args.similar_to, top=args.top)
