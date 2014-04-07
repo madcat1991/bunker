@@ -1,0 +1,43 @@
+<!doctype HTML>
+<html>
+<head>
+	<title>Template</title>
+</head>
+<body>
+	<style>
+		div.item {
+			width: 100px;
+			display: inline-block;
+			height: 200px;
+			padding: 3px;
+			margin: 3px;
+            font-family: Arial, Helvetica, FreeSans, 'Liberation Sans', sans-serif;
+            font-size: 12px;
+            position: relative;
+		}
+		a {
+			color: #000;
+		}
+		a:hover {
+			color: #f00;
+		}
+        img.is-paid {
+            position: absolute;
+            top: 130px;
+            left: 6px;
+        }
+
+	</style>
+
+{{ range .ResultVectors }}
+	<div class="item">
+		<a href="http://www.ivi.ru{{ .IviWatchLink }}"><img src="{{ .ThumbsIviPoster }}/97x147/" width="97" height="147"/></a>
+        {{ if .IsPaid }}<img class="is-paid" src="//img.ivi.ru/img/paid.png" width="16" height="16"/>{{ end }}
+		<br/>
+		<a href="http://www.ivi.ru{{ .IviWatchLink }}">{{ .Title }}</a>
+	</div>
+{{ else }}
+(Тут ничего нет)
+{{ end }}
+</body>
+</html>
