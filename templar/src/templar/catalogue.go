@@ -13,12 +13,14 @@ type Catalogue struct {
 type Query struct {
 	Subsite int
 	AppVersion int
+	ForId int
 	Ids []int
 	Template string
 	QueryVector *CatalogueVector
 	ResultVectors []*CatalogueVector
 	AlternateResultVectors []*CatalogueVector
 	ResultHeaderText string
+	HydraUrl string
 }
 
 func CatalogueFromVectors(vectors []*CatalogueVector) *Catalogue {

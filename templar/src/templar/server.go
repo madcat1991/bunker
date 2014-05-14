@@ -12,12 +12,14 @@ import (
 type TemplarServer struct {
 	catalogue *Catalogue
 	givi_client *GiviClient
+	hydra_url string
 }
 
-func NewTemplarServer(cat *Catalogue) *TemplarServer {
+func NewTemplarServer(cat *Catalogue, hydra_url string) *TemplarServer {
 	s := &TemplarServer{}
 	s.catalogue = cat
 	s.givi_client = &GiviClient{}
+	s.hydra_url = hydra_url
 	return s
 }
 
@@ -64,7 +66,18 @@ func (self *TemplarServer) ParseCommonParams(r *http.Request) (*Query, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	query.ForId, err = intOrDefault("for_id", 0)
+	if err != nil {
+		return nil, err
+	}
+	if query.ForId != 0 {
+		query.QueryVector = self.catalogue.GetByQid(query.ForId)
+	}
+
 	query.Template = r.FormValue("template")
+
+	query.HydraUrl = self.hydra_url
 	return query, nil
 }
 
