@@ -1,0 +1,54 @@
+<!doctype HTML>
+<html>
+<head>
+	<title>Template</title>
+</head>
+<body>
+	<style>
+		body {
+            font-family: Arial, Helvetica, FreeSans, 'Liberation Sans', sans-serif;
+		}
+		h1 {
+			font-size: 16px;
+		}
+		div.item {
+			vertical-align: top;
+			width: 100px;
+			display: inline-table;
+			height: 200px;
+			padding: 3px;
+			margin: 3px;
+            font-size: 12px;
+            position: relative;
+		}
+		a {
+			color: #000;
+		}
+		a:hover {
+			color: #f00;
+		}
+        img.is-paid {
+            position: absolute;
+            top: 130px;
+            left: 6px;
+        }
+
+	</style>
+
+	<h1>
+		Похожие на &laquo;<a href="http://www.ivi.ru{{ .QueryVector.IviWatchLink }}">{{ .QueryVector.Title }}</a>&raquo;
+	</h1>
+<div class="recommendations">
+{{ range .ResultVectors }}
+	<div class="item">
+		<a href="http://www.ivi.ru{{ .IviWatchLink }}"><img src="{{ .ThumbsIviPoster }}/97x147/" width="97" height="147"/></a>
+        {{ if .IsPaid }}<img class="is-paid" src="//img.ivi.ru/img/paid.png" width="16" height="16"/>{{ end }}
+		<br/>
+		<a href="{{$.HydraUrl}}{{ .Qid }}/?top=10">{{ .Title }}</a>
+	</div>
+{{ else }}
+(Тут ничего нет)
+{{ end }}
+</div>
+</body>
+</html>
