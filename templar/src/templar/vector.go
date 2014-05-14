@@ -14,39 +14,12 @@ const (
 type CatalogueVector struct {
     Qid int
     Title string
-    Description string
-    Duration int
-    Country int
-    Restrict int
-    Genres []int
-    Main_genre int
-    Lang int
-    Categories []int
-    Seasons []int
-    Episodes []int
-    Release_date string
-    Ivi_pseudo_release_date string
-    Date_insert string
-    Date_start string
-    Date_end string
-    Year_from int
-    Year_to int
-    Years []int
     Content_paid_types []string
-    Kinopoisk_id int
-    Kinopoisk_rating float64
-    Imdb_rating float64
-    World_box_office int64
-    Usa_box_office int64
-    Budget int64
-    Content_ids []int
     Is_active bool
     Subsite_ids []int
     Versions_with_allowed_formats []int
     Hru string
-    Artists []string
     Posters []string
-    Thumbs []string
 	mapSubsiteIds map[int]bool
 	mapVersions map[int]bool
 	IsPaid bool
@@ -126,7 +99,17 @@ func GetCatalogueVectors(db *pg.DB) ([]*CatalogueVector, error) {
 	/*}*/
     result := &CatalogueVectors{}
     /*_, err = db.Query(result, string(query))*/
-    _, err := db.Query(result, "SELECT qid, title, description, duration, country, restrict, genres, main_genre, lang, release_date, ivi_pseudo_release_date, is_active, versions_with_allowed_formats, content_paid_types, subsite_ids, posters, hru, year_from FROM catalogue_table")
+    _, err := db.Query(result, `
+    	SELECT
+    		qid,
+    		title,
+    		is_active,
+    		versions_with_allowed_formats,
+    		content_paid_types,
+    		subsite_ids,
+    		posters,
+    		hru
+    	FROM catalogue_table`)
 
     if err != nil {
         return nil, err
