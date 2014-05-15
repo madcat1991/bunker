@@ -13,114 +13,51 @@ compilation_posters_temp AS (
         JOIN files f ON f.id = ANY(cp.files)
         JOIN servers s ON s.id = f.server_id
     GROUP BY cp.compilation_id
-),
-thumbs_by_content AS (
-    SELECT ct.id, array_agg(ts.host || '/contents/' || tf.path) AS thumbs
-    FROM content_thumb_pack ct
-    JOIN files tf
-        ON (tf.id = ANY(ct.files)) AND tf.format = 7
-    JOIN servers ts ON ts.id = tf.server_id
-    GROUP BY 1
 )
 SELECT
-    mcv.id * 10 + 0 AS qid,
-    mcv.title,
-    mcv.description,
-    mcv.duration,
-    mcv.country,
-    mcv.restrict,
-    mcv.genres,
-    mcv.main_genre,
-    mcv.lang,
-    mcv.categories,
-    mcv.seasons,
-    mcv.episodes,
-    mcv.release_date,
-    mcv.ivi_pseudo_release_date,
-    mcv.date_insert,
-    mcv.date_start,
-    mcv.date_end,
-    mcv.year_from,
-    mcv.year_to,
-    ARRAY[mcv.year_from]::int[] AS years,
+    hcv.id * 10 + 0 AS qid,
+    c.title,
     mcv.content_paid_types,
-    mcv.kinopoisk_id,
-    mcv.kinopoisk_rating,
-    mcv.imdb_rating,
-    mcv.world_box_office,
-    mcv.usa_box_office,
-    mcv.budget,
-    NULL AS content_ids,
     mcv.is_active,
     mcv.subsite_ids,
-    mcv.versions_with_allowed_formats,
+    cavp.versions_with_allowed_formats,
     NULL AS hru,
-    ARRAY(
-        SELECT p.name
-        FROM content_person cp
-        JOIN person p
-            ON (cp.person_id = p.id)
-        WHERE (cp.content_id = mcv.id AND cp.person_type_id = 6)
-        ORDER BY cp.id
-    ) AS artists,
-    COALESCE(cpt.posters, copt.posters, '{}') AS posters,
-    thumbs_by_content.thumbs
-FROM mobile_content_view mcv
+    COALESCE(cpt.posters, copt.posters, '{}') AS posters
+FROM hydra_content_view hcv
+    JOIN content c ON c.id = hcv.id
+    LEFT JOIN content_app_version_mapi cavp ON hcv.id = cavp.content_id
+    LEFT JOIN mobile_content_view mcv ON hcv.id = mcv.id
     --поиск постеров у контента
-    LEFT JOIN content_posters_temp cpt ON cpt.content_id = mcv.id
+    LEFT JOIN content_posters_temp cpt ON cpt.content_id = hcv.id
     --поиск постеров у сборников
-    LEFT JOIN compilation_posters_temp copt ON copt.compilation_id = mcv.compilation_id
-    LEFT JOIN thumbs_by_content ON thumbs_by_content.id = mcv.preview_id
-WHERE mcv.compilation_id IS NULL
+    LEFT JOIN compilation_posters_temp copt ON copt.compilation_id = hcv.compilation_id
+WHERE hcv.compilation_id IS NULL
 
 
 UNION ALL
 
 
 SELECT
-    mcv.id * 10 + 1 AS qid,
-    mcv.title,
-    mcv.description,
-    NULL AS duration,
-    mcv.country,
-    mcv.restrict,
-    mcv.genres,
-    NULL AS main_genre,
-    mcv.lang,
-    mcv.categories,
-    mcv.seasons,
-    mcv.episodes,
-    mcv.release_date,
-    mcv.ivi_pseudo_release_date,
-    mcv.date_start,
-    mcv.date_end,
-    mcv.date_insert,
-    mcv.year_from,
-    mcv.year_to,
-    mcv.years,
+    hcv.compilation_id * 10 + 1 AS qid,
+    c.title,
     mcv.content_paid_types,
-    mcv.kinopoisk_id,
-    mcv.kinopoisk_rating,
-    mcv.imdb_rating,
-    mcv.world_box_office,
-    mcv.usa_box_office,
-    mcv.budget,
-    mcv.content_ids,
     mcv.is_active,
     mcv.subsite_ids,
-    mcv.versions_with_allowed_formats,
-    mcv.hru,
-    ARRAY(
-        SELECT p.name
-        FROM compilation_person cp
-        JOIN person p
-            ON (cp.person_id = p.id)
-        WHERE (cp.compilation_id = mcv.id AND cp.person_type_id = 6)
-        ORDER BY cp.id
-    ) AS artists,
-    compilation_posters_temp.posters,
-    NULL AS thumbs
-FROM mobile_compilation_view mcv
-LEFT JOIN compilation_posters_temp
-    ON compilation_posters_temp.compilation_id = mcv.id
+    cavp.versions_with_allowed_formats,
+    c.hru,
+    cpt.posters
+FROM hydra_content_view hcv
+    JOIN compilation c ON hcv.compilation_id = c.id
+    LEFT JOIN compilation_app_version_mapi cavp ON hcv.compilation_id = cavp.compilation_id
+    LEFT JOIN mobile_compilation_view mcv ON hcv.compilation_id = mcv.id
+    LEFT JOIN compilation_posters_temp cpt ON cpt.compilation_id = hcv.compilation_id
+WHERE hcv.compilation_id IS NOT NULL
+GROUP BY
+    hcv.compilation_id,
+    c.id,
+    mcv.content_paid_types,
+    mcv.is_active,
+    mcv.subsite_ids,
+    cavp.versions_with_allowed_formats,
+    cpt.posters
 ;
